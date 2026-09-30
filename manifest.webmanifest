@@ -1,0 +1,16 @@
+{
+  "name": "Aura Battle — Farmeo Total",
+  "short_name": "Aura Battle",
+  "description": "Batallas de farmear aura. Pulsa el botón que se ilumina y gana la pista.",
+  "start_url": "juego.html",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#6C4BFF",
+  "theme_color": "#6C4BFF",
+  "lang": "es",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
