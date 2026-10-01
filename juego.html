@@ -1692,13 +1692,14 @@ function musicTempo(v){ bpm = v; if(TRACK.src && AC) TRACK.src.playbackRate.setT
    Si un archivo no existe o no carga, suena la música sintetizada. */
 /* Bucles preparados para el juego: duración exacta en segundos (sin el relleno del MP3).
    Si una canción no está aquí, se repite el archivo entero. */
-const MUSIC_LOOP = { bcn: 94.45399 };
+const MUSIC_LOOP = { bcn: 94.45399, cdmx: 80.42975 };
 const TRACK = {id:null, raw:null, buf:null, ok:false, src:null, gain:null, vol:0.55, loopStart:0, loopEnd:0};
 let musicOn = false;
 function loadTrack(spot){
   if(!spot || TRACK.id===spot.id) return;
-  musicStopNow();
+  musicStop();                                                  // la canción anterior se funde, no se corta en seco
   TRACK.id = spot.id; TRACK.ok = false; TRACK.buf = null; TRACK.raw = null;
+  if(musicOn) startBeat();                                      // mientras llega la canción nueva, sintetizador
   if(typeof fetch!=='function') return;
   const id = spot.id;
   fetch('musica/'+id+'.mp3').then(r=>{ if(!r.ok) throw new Error('sin canción'); return r.arrayBuffer(); })
@@ -1745,7 +1746,7 @@ function musicStopNow(){
   TRACK.src = null; TRACK.gain = null;
 }
 function stepMusic(){
-  if(muted||!AC||S.mode!=='play') return;
+  if(muted||!AC||!musicOn) return;
   const bar = Math.floor(seqStep/16)%4, st = seqStep%16, chord = CHORDS[bar];
   // charles
   noise(.03, st%4===2 ? .05 : .022);
@@ -1847,6 +1848,7 @@ function banner(txt, ms){
 }
 function showScreen(id){
   ['scTitle','scSelect','scEnd','scInfo','scGira'].forEach(s=>$('#'+s).classList.toggle('on', s===id));
+  if(id==='scTitle'||id==='scSelect'||id==='scInfo'||id==='scGira') stopBeat();   // en los menús, silencio
 }
 
 /* --------- entrada compatible con cualquier navegador ---------
@@ -1961,11 +1963,11 @@ function startTurn(i){
     setTimeout(()=>{ if(!S.spectate && S.mode==='play' && S.turn===1 && S.rival) bubble(S.rival.hi); }, 700);
 
   }
-  SFX.crowd(); startBeat();
+  SFX.crowd(); if(!musicOn) startBeat();
 }
 
 function endTurn(){
-  clearPrompt(); stopBeat(); $('#booTip').classList.remove('on');
+  clearPrompt(); $('#booTip').classList.remove('on');
   S.mode = 'pause';
   if(S.turn===0){
     playAnim(P1,'idle');
@@ -2007,7 +2009,7 @@ function endTanda(){
 }
 
 function endMatch(){
-  S.mode='over'; stopBeat(); clearPrompt(); $('#booTip').classList.remove('on');
+  S.mode='over'; clearPrompt(); $('#booTip').classList.remove('on');
   const w = S.won[0]===S.won[1]
     ? (S.total[0] >= S.total[1] ? 0 : 1)
     : (S.won[0] > S.won[1] ? 0 : 1);
@@ -2468,7 +2470,7 @@ function shareTo(kind){
 /* --------- ZONA DE BATALLAS: dos rivales se enfrentan solos --------- */
 function startSpectate(){
   S.gira = null; setPool(null);
-  S.spot = chooseSpot(true); $('#hud').classList.add('playing');
+  S.spot = chooseSpot(true); if(!musicOn) startBeat(); $('#hud').classList.add('playing');
   track('batalla_inicio');
   clearGlory();
   $('#hud').classList.remove('ended');
@@ -2998,7 +3000,7 @@ document.addEventListener('gesturestart', e=>e.preventDefault());
 document.addEventListener('touchmove', e=>{ if(!e.target.closest || !e.target.closest('.endWrap,.infoBox,.roster')) e.preventDefault(); }, {passive:false});
 if(window.visualViewport) window.visualViewport.addEventListener('resize', ()=>setTimeout(resize,50));
 document.addEventListener('dblclick', e=>e.preventDefault(), {passive:false});
-document.addEventListener('visibilitychange', ()=>{ if(document.hidden) stopBeat(); else { if(AC && AC.state==='suspended') AC.resume().catch(()=>{}); if(S.mode==='play') startBeat(); } });
+document.addEventListener('visibilitychange', ()=>{ if(document.hidden) stopBeat(); else { if(AC && AC.state==='suspended') AC.resume().catch(()=>{}); if(S.mode==='play'||S.mode==='pause'||S.mode==='bet'||S.mode==='over') startBeat(); } });
 
 /* ---------- arranque ---------- */
 if(initGL()){
