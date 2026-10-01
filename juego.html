@@ -322,8 +322,9 @@ function track(n,p){ try{ gtag('event',n,p||{}); }catch(e){} }
   #bubbleL.on{transform:translate(-50%,-100%) scale(1);}
   #spec{position:absolute;inset:0;display:none;pointer-events:none;}
   #spec.on{display:block;}
-  #spotTag{position:absolute;top:calc(58px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);white-space:nowrap;display:none;
-    font-size:clamp(10px,2.2vh,14px);color:#FFE97A;letter-spacing:1px;background:rgba(24,9,66,.6);border:2px solid rgba(255,255,255,.18);border-radius:99px;padding:3px 12px;}
+  #spotTag{position:absolute;left:50%;transform:translateX(-50%);top:calc(100% + clamp(30px,5.6vh,38px));white-space:nowrap;display:none;
+    max-width:min(92vw,560px);overflow:hidden;text-overflow:ellipsis;font-size:clamp(9px,1.9vh,13px);color:#FFE97A;letter-spacing:.5px;
+    background:rgba(24,9,66,.6);border:2px solid rgba(255,255,255,.18);border-radius:99px;padding:2px 12px;pointer-events:none;}
   #hud.playing #spotTag{display:block;}
   .spotRow{display:flex;align-items:center;gap:10px;}
   .spotBtn{width:38px;height:38px;border-radius:99px;border:3px solid var(--ink);background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;
@@ -443,7 +444,8 @@ function track(n,p){ try{ gtag('event',n,p||{}); }catch(e){} }
     .cluster{gap:clamp(8px,2.6vw,12px);}
     #special{bottom:calc(var(--pad) + clamp(60px,21vw,92px)*2 + clamp(8px,2.6vw,12px) + 16px);width:clamp(64px,19vw,86px);height:clamp(64px,19vw,86px);}
     #booTip{bottom:calc(var(--pad) + clamp(60px,21vw,92px)*2 + clamp(8px,2.6vw,12px) + 16px);}
-    #promptWrap{top:29%;}
+    #promptWrap{top:31%;}
+    #spotTag{font-size:clamp(9px,2.7vw,12px);top:calc(100% + clamp(28px,7vw,34px));}
     #judge{top:13%;}
     #combo{top:41%;}
     #tut{font-size:clamp(24px,7vw,40px);}
@@ -467,6 +469,7 @@ function track(n,p){ try{ gtag('event',n,p||{}); }catch(e){} }
     <div id="clock">
       <div id="clockNum" class="stroke">40</div>
       <div id="roundTag" class="stroke s2">ASALTO 1</div>
+      <div id="spotTag" class="stroke s2"></div>
     </div>
     <div class="side r" id="side2">
       <div class="nameRow stroke s2"><span id="p2name">RIVAL</span><span class="tot" id="tot2">0</span></div>
@@ -498,7 +501,6 @@ function track(n,p){ try{ gtag('event',n,p||{}); }catch(e){} }
   </div>
 
   <div id="booTip" class="stroke s2">📣 ¡MACHACA PARA ABUCHEAR!</div>
-  <div id="spotTag" class="stroke s2"></div>
   <div id="fever"></div>
   <div id="feverTag" class="stroke">🔥 FIEBRE x2</div>
   <div id="bubble"></div>
@@ -1636,7 +1638,7 @@ function unlockMedia(){
   }catch(e){}
 }
 function audioInit(){
-  unlockMedia();
+  unlockMedia(); setTimeout(()=>{ try{ decodeTrack(); }catch(e){} }, 0);
   if(AC){ if(AC.state==='suspended') AC.resume().catch(()=>{}); return; }
   try{
     AC = new (window.AudioContext||window.webkitAudioContext)();
@@ -1682,32 +1684,65 @@ const SFX = {
 let bpm = 126, beatPulse = 0, seqStep = 0;
 const CHORDS = [[110,130.8,164.8],[87.3,110,130.8],[130.8,164.8,196],[98,123.5,146.8]];  // Am F C G
 const BASSP  = [0,0,12,0, 7,0,12,7];                 // semitonos sobre la fundamental
-function musicTempo(v){ bpm = v; if(TRACK.el && TRACK.ok) TRACK.el.playbackRate = v>130 ? 1.06 : 1; }
+function musicTempo(v){ bpm = v; if(TRACK.src && AC) TRACK.src.playbackRate.setTargetAtTime(v>130 ? 1.06 : 1, AC.currentTime, 0.4); }
 
 /* ---------- MÚSICA POR SPOT (archivos MP3 opcionales) ----------
    Coloca en la carpeta musica/ un archivo por ciudad con el id del spot:
    musica/cdmx.mp3, musica/rio.mp3, musica/paris.mp3 …  (ids en SPOTS)
    Si un archivo no existe o no carga, suena la música sintetizada. */
-const TRACK = {el:null, id:null, ok:false, vol:0.55};
+/* Bucles preparados para el juego: duración exacta en segundos (sin el relleno del MP3).
+   Si una canción no está aquí, se repite el archivo entero. */
+const MUSIC_LOOP = { bcn: 94.45399 };
+const TRACK = {id:null, raw:null, buf:null, ok:false, src:null, gain:null, vol:0.55, loopStart:0, loopEnd:0};
+let musicOn = false;
 function loadTrack(spot){
-  if(!spot || typeof Audio==='undefined') return;
-  if(TRACK.id===spot.id) return;
-  if(TRACK.el){ try{ TRACK.el.pause(); }catch(e){} TRACK.el.src=''; }
-  TRACK.id = spot.id; TRACK.ok = false;
-  const el = new Audio('musica/'+spot.id+'.mp3');
-  el.loop = true; el.preload = 'auto'; el.volume = 0; el.setAttribute('playsinline','');
-  el.addEventListener('canplaythrough', ()=>{ TRACK.ok = true; if(beatTimer) musicPlay(); }, {once:true});
-  el.addEventListener('error', ()=>{ TRACK.ok = false; }, {once:true});
-  TRACK.el = el; el.load();
+  if(!spot || TRACK.id===spot.id) return;
+  musicStopNow();
+  TRACK.id = spot.id; TRACK.ok = false; TRACK.buf = null; TRACK.raw = null;
+  if(typeof fetch!=='function') return;
+  const id = spot.id;
+  fetch('musica/'+id+'.mp3').then(r=>{ if(!r.ok) throw new Error('sin canción'); return r.arrayBuffer(); })
+    .then(ab=>{ if(TRACK.id!==id) return; TRACK.raw = ab; decodeTrack(); })
+    .catch(()=>{});
+}
+function decodeTrack(){
+  if(!AC || !TRACK.raw || TRACK.buf) return;
+  const id = TRACK.id, raw = TRACK.raw; TRACK.raw = null;
+  let fired = false;
+  const done = b=>{
+    if(fired || TRACK.id!==id || !b) return; fired = true;
+    // salta el silencio de cebado del codificador MP3 (si el navegador no lo ha quitado ya)
+    const ch = b.getChannelData(0), lim = Math.min(ch.length, Math.floor(b.sampleRate*0.12)); let i=0;
+    while(i<lim && Math.abs(ch[i])<0.0015) i++;
+    TRACK.loopStart = i/b.sampleRate;
+    const L = MUSIC_LOOP[id];
+    TRACK.loopEnd = (L && TRACK.loopStart+L <= b.duration+0.001) ? TRACK.loopStart+L : b.duration;
+    TRACK.buf = b; TRACK.ok = true;
+    if(musicOn) musicPlay();
+  };
+  try{ const pr = AC.decodeAudioData(raw, done, ()=>{}); if(pr && pr.then) pr.then(done).catch(()=>{}); }catch(e){}
 }
 function musicPlay(){
-  if(!TRACK.el || !TRACK.ok || muted) return;
-  const el = TRACK.el; const pr = el.play(); if(pr && pr.catch) pr.catch(()=>{});
-  clearInterval(TRACK.fade); TRACK.fade = setInterval(()=>{ el.volume = Math.min(TRACK.vol, el.volume+0.05); if(el.volume>=TRACK.vol) clearInterval(TRACK.fade); }, 60);
+  if(!AC) return; decodeTrack();
+  if(!TRACK.ok || muted || TRACK.src) return;
+  const g = AC.createGain(); g.gain.value = 0; g.connect(AC.destination);
+  const src = AC.createBufferSource(); src.buffer = TRACK.buf; src.loop = true;
+  src.loopStart = TRACK.loopStart; src.loopEnd = TRACK.loopEnd;
+  src.playbackRate.value = bpm>130 ? 1.06 : 1;
+  src.connect(g); src.start(0, TRACK.loopStart);
+  g.gain.setTargetAtTime(TRACK.vol, AC.currentTime, 0.35);
+  TRACK.src = src; TRACK.gain = g;
+  if(beatTimer){ clearTimeout(beatTimer); beatTimer = null; }      // calla el sintetizador
 }
 function musicStop(){
-  if(!TRACK.el) return; const el = TRACK.el;
-  clearInterval(TRACK.fade); TRACK.fade = setInterval(()=>{ el.volume = Math.max(0, el.volume-0.06); if(el.volume<=0){ clearInterval(TRACK.fade); try{ el.pause(); }catch(e){} } }, 60);
+  if(!TRACK.src || !AC) return;
+  const src = TRACK.src, g = TRACK.gain; TRACK.src = null; TRACK.gain = null;
+  try{ g.gain.setTargetAtTime(0, AC.currentTime, 0.18); src.stop(AC.currentTime + 1.0); }catch(e){}
+}
+function musicStopNow(){
+  if(!TRACK.src) return;
+  try{ TRACK.src.stop(); }catch(e){}
+  TRACK.src = null; TRACK.gain = null;
 }
 function stepMusic(){
   if(muted||!AC||S.mode!=='play') return;
@@ -1727,12 +1762,13 @@ function stepMusic(){
   seqStep++;
 }
 function startBeat(){
-  stopBeat(); seqStep = 0;
-  if(TRACK.ok){ musicPlay(); beatTimer = setTimeout(()=>{}, 1); return; }   // hay canción del spot: no suena el sintetizador
-  const loop = ()=>{ stepMusic(); beatPulse = (seqStep%4===1) ? 1 : beatPulse*0.6; beatTimer = setTimeout(loop, 60000/bpm/4); };
+  stopBeat(); musicOn = true; seqStep = 0;
+  decodeTrack();
+  if(TRACK.ok){ musicPlay(); return; }                          // hay canción del spot
+  const loop = ()=>{ if(!musicOn || TRACK.src) return; stepMusic(); beatPulse = (seqStep%4===1) ? 1 : beatPulse*0.6; beatTimer = setTimeout(loop, 60000/bpm/4); };
   loop();
 }
-function stopBeat(){ if(beatTimer) clearTimeout(beatTimer); beatTimer=null; musicStop(); }
+function stopBeat(){ musicOn = false; if(beatTimer) clearTimeout(beatTimer); beatTimer=null; musicStop(); }
 
 /* ============================================================
    ESTADO DE JUEGO — 5 tandas, farmea uno y luego el otro
