@@ -151,7 +151,10 @@ function track(n,p){ try{ gtag('event',n,p||{}); }catch(e){} }
   #booTip{position:absolute;left:50%;transform:translateX(-50%);
     bottom:calc(var(--pad) + clamp(66px,16vh,110px));white-space:nowrap;display:none;
     font-size:clamp(11px,2.4vh,16px);color:var(--cyan);}
-  #booTip.on{display:block;animation:booTip .8s infinite alternate;}
+  #booTip.on{display:flex;align-items:center;gap:4px;white-space:nowrap;animation:booTip .8s infinite alternate;
+    background:rgba(24,9,66,.7);border:2px solid var(--cyan);border-radius:99px;padding:5px 12px;}
+  .boobar{display:inline-block;width:clamp(70px,16vw,140px);height:12px;border-radius:99px;background:rgba(0,0,0,.4);border:2px solid var(--ink);overflow:hidden;vertical-align:middle;}
+  .boobar i{display:block;height:100%;background:linear-gradient(90deg,#37E1FF,#8BFF5C);transition:width .08s;}
   @keyframes booTip{to{transform:translateX(-50%) scale(1.06);}}
   .pad.holding{transform:translateY(6px) scale(.94);box-shadow:0 0 0 var(--ink),0 0 26px 8px var(--gold);}
 
@@ -551,7 +554,7 @@ function track(n,p){ try{ gtag('event',n,p||{}); }catch(e){} }
   <div class="infoBox">
     <div class="infoTitle stroke">CÓMO SE JUEGA</div>
     <p><b>Se baila, no se pelea.</b> Pulsa el botón que se ilumina. Cuanto antes reacciones, más aura: perfecto 500, bien 350, a tiempo 200.</p>
-    <p><b>Turnos.</b> Farmeas 10 segundos. Luego farmea el rival y tú le abucheas machacando cualquier botón. Tres tandas; gana quien más tandas se lleve.</p>
+    <p><b>Turnos.</b> Farmeas 10 segundos. Luego farmea el rival y tú le abucheas: cada toque en cualquier botón llena el medidor de abucheo; al llenarlo (8 toques) el rival tropieza y pierde 600 de aura, hasta tres veces por turno. Tres tandas; gana quien más tandas se lleve.</p>
     <p><b>Retos especiales.</b> MANTÉN: aguanta hasta que la barra del botón se llene. DOBLE: dos botones seguidos. MACHACA: pulsa varias veces el mismo.</p>
     <p><b>Racha y fiebre.</b> 3 aciertos seguidos ×1,5 · 6 seguidos ×2 y entra el MODO FIEBRE. Un fallo la corta.</p>
     <p><b>Remate.</b> Cuando el medidor de AURA MAX esté lleno, pulsa el botón central: +2.000 de golpe.</p>
@@ -1938,7 +1941,7 @@ function startTurn(i){
   S.gap = i===0 ? 1.0 : 0;
   S.aiGap = 0.6;
   { const d = DIFF[S.diff]; S.aiAcc = S.spectate ? 0.74 : Math.min(d.max, d.acc0 + d.step*(S.tanda-1)); }   // en la zona bailan a tope
-  S.boos = 0; S.boosUsed = 0;
+  S.boos = 0; S.boosUsed = 0; if(i===1) paintBoo();
   S.finishing = false;
   S.mode = 'play';
   updateSp();
@@ -2619,21 +2622,34 @@ function failCombo(){
 function mult(){ return 1 + Math.min(1, Math.floor(S.combo/3)*0.5); }   // x1 · x1,5 (3 seguidos) · x2 (6 seguidos)
 
 /* --------- entrada --------- */
+const BOO_NEED = 8, BOO_MAX = 3;
+function paintBoo(){
+  const el = $('#booTip'); if(!el) return;
+  if(S.boosUsed >= BOO_MAX){ el.innerHTML = '📣 Abucheos agotados este turno'; return; }
+  const n = Math.min(S.boos, BOO_NEED);
+  el.innerHTML = `📣 MACHACA CUALQUIER BOTÓN &nbsp;<span class="boobar"><i style="width:${n/BOO_NEED*100}%"></i></span>&nbsp; ${n}/${BOO_NEED}` +
+                 (S.boosUsed ? ` · ${S.boosUsed} de ${BOO_MAX} abucheos` : '');
+}
 function padDown(id, el){
   if(S.mode!=='play' || S.finishing) return;
   if(el){ el.classList.add('hit'); setTimeout(()=>el.classList.remove('hit'),90); }
 
-  // turno del rival: machacar cualquier botón para abuchear
+  // turno del rival: cada toque en cualquier botón llena el medidor de abucheo
   if(S.turn===1){
+    if(S.boosUsed >= BOO_MAX){ playAnim(P1, id, 0.5); return; }
     playAnim(P1, id, 0.5);
     S.boos++;
-    if(S.boos % 10 === 0 && S.boosUsed < 2){
-      S.boosUsed++;
+    tone(140 + S.boos*12, .05, 'square', .05); buzz(8);
+    floater('¡buuu!', 26 + Math.random()*12, 46 + Math.random()*8, '#37E1FF');
+    paintBoo();
+    if(S.boos >= BOO_NEED){
+      S.boos = 0; S.boosUsed++;
       addAura(1, hasTruco('abucheo2') ? -1200 : -600);
       playAnim(P2,'cringe',0.8);
       judge('¡ABUCHEO!','#37E1FF'); floater(hasTruco('abucheo2') ? '−1.200 al rival' : '−600 al rival', 74, 40, '#37E1FF');
-      burst(P2.pivot.position, 0x37E1FF, 10, 1.2);
-      SFX.bad(); shakeIt(0.2,0.12); buzz(30); crowdBoo();
+      burst(P2.pivot.position, 0x37E1FF, 14, 1.4);
+      SFX.bad(); shakeIt(0.25,0.15); buzz([30,20,40]); crowdBoo();
+      paintBoo();
     }
     return;
   }
