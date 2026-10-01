@@ -1,6 +1,15 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+<!-- Google Analytics (gtag.js) con modo de consentimiento: sin cookies hasta que el usuario acepte -->
+<script>
+window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}
+gtag('consent','default',{ad_storage:'denied',ad_user_data:'denied',ad_personalization:'denied',analytics_storage:'denied',wait_for_update:500});
+try{ if(localStorage.getItem('ab_cookies')==='ok') gtag('consent','update',{analytics_storage:'granted'}); }catch(e){}
+gtag('js',new Date()); gtag('config','G-1VNZDC2G4E');
+function track(n,p){ try{ gtag('event',n,p||{}); }catch(e){} }
+</script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-1VNZDC2G4E"></script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>AURA BATTLE — Batallas de farmear aura. Juega gratis en el móvil</title>
@@ -100,6 +109,8 @@
        box-shadow:0 7px 0 var(--ink);cursor:pointer;user-select:none;-webkit-user-select:none;transition:opacity .15s,transform .06s,box-shadow .06s;color:#fff;
        font-family:var(--display);font-size:clamp(10px,1.2vw,15px);letter-spacing:.5px;text-shadow:0 2px 0 rgba(35,16,82,.8);position:relative;overflow:hidden;touch-action:manipulation}
   .pad span{font-size:clamp(28px,3.4vw,44px);line-height:1;filter:drop-shadow(0 3px 0 rgba(35,16,82,.4))}
+  .pad .ico{width:clamp(30px,4vw,52px);height:clamp(30px,4vw,52px)} .pad .ico svg{width:100%;height:100%;display:block}
+  .pad::before{content:'';position:absolute;left:10%;right:10%;top:6%;height:24%;border-radius:99px;background:rgba(255,255,255,.38);pointer-events:none}
   .pad .fill{position:absolute;left:0;right:0;bottom:0;height:0%;background:rgba(255,255,255,.55);pointer-events:none}
   .padgrid.focus .pad:not(.lit){opacity:.38}
   .pad.lit{animation:glow .4s infinite alternate}
@@ -179,6 +190,16 @@
     *{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important}
   }
 </style>
+<style>
+#cookies{position:fixed;left:50%;bottom:max(12px,env(safe-area-inset-bottom));transform:translateX(-50%);z-index:9999;width:min(94vw,640px);
+  background:#231052;color:#F3ECFF;border:3px solid #fff;border-radius:18px;padding:12px 16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;
+  font:500 14px/1.4 "Fredoka","Arial Rounded MT Bold",Verdana,system-ui,sans-serif;box-shadow:0 10px 30px rgba(0,0,0,.4)}
+#cookies[hidden]{display:none}
+#cookies p{margin:0;flex:1 1 260px}
+#cookies a{color:#FFD230}
+#cookies button{font:700 14px "Fredoka","Arial Rounded MT Bold",Verdana,sans-serif;border:3px solid #fff;border-radius:99px;padding:8px 16px;cursor:pointer}
+#ckOk{background:#FFD230;color:#231052}#ckNo{background:transparent;color:#fff}
+</style>
 </head>
 <body>
 
@@ -190,9 +211,9 @@
   </div>
   <div class="in">
     <h1 class="disp outline">AURA<br>BATTLE<small>farmeo total</small></h1>
-    <p class="tag">Las batallas de farmear aura, en tu móvil. Se ilumina un botón, lo pulsas, tu bailarín clava el paso. Nadie pelea: se baila.</p>
+    <p class="tag">Las batallas de farmear aura, en tu móvil. Se ilumina un botón, lo pulsas, tu bailarín clava el paso. Una Gira Mundial de quince ciudades para ganar pasos, trucos y la corona.</p>
     <div class="ctas">
-      <a class="btn" href="juego.html" id="playBtn">🎮 Jugar gratis</a>
+      <a class="btn" href="juego.html" id="playBtn">🌍 Jugar la Gira</a>
       <a class="btn ghost" href="juego.html?batallas=1">📺 Ver una batalla</a>
     </div>
     <div class="facts"><span>Gratis</span><span>Sin descargas</span><span>Sin registro</span><span>Móvil y ordenador</span></div>
@@ -201,7 +222,7 @@
 </header>
 
 <div class="ticker" aria-hidden="true"><div>
-  <span class="g">+500 PERFECTO</span><span>SIC SEVEN</span><span class="p">🔥 MODO FIEBRE x2</span><span>GRIDDY</span><span class="c">¡ABUCHEO!</span><span>AURA FARM</span><span class="l">+2.000 REMATE</span><span>SKIBIDI</span><span class="g">LEYENDA DE LA PISTA</span><span>SIUUU</span><span class="p">TANDA 3/5</span><span>MEWING</span><span class="c">VAS CON MAXI RIZZ</span><span>FLOSS</span><span class="l">NUEVO RÉCORD</span><span>SHUFFLE</span>
+  <span class="g">+500 PERFECTO</span><span>SIC SEVEN</span><span class="p">🔥 MODO FIEBRE x2</span><span>GRIDDY</span><span class="c">¡ABUCHEO!</span><span>AURA FARM</span><span class="l">+2.000 REMATE</span><span>SKIBIDI</span><span class="g">LEYENDA DE LA PISTA</span><span>SIUUU</span><span class="p">TANDA 3/5</span><span>MEWING</span><span class="c">VAS CON MAXI RIZZ</span><span>FLOSS</span><span class="l">NUEVO RÉCORD</span><span>SHUFFLE</span><span class="g">🌍 GIRA MUNDIAL</span><span class="c">📍 CHAPULTEPEC</span><span class="p">🔓 NUEVO PASO: SIUUU</span>
   <span class="g">+500 PERFECTO</span><span>SIC SEVEN</span><span class="p">🔥 MODO FIEBRE x2</span><span>GRIDDY</span><span class="c">¡ABUCHEO!</span><span>AURA FARM</span><span class="l">+2.000 REMATE</span><span>SKIBIDI</span><span class="g">LEYENDA DE LA PISTA</span><span>SIUUU</span><span class="p">TANDA 3/5</span><span>MEWING</span><span class="c">VAS CON MAXI RIZZ</span><span>FLOSS</span><span class="l">NUEVO RÉCORD</span><span>SHUFFLE</span>
 </div></div>
 
@@ -213,7 +234,7 @@
       <ul class="howlist">
         <li><i>💡</i><div><b>Uno se enciende, los demás se apagan</b>No hay que buscar nada. Lo ves y lo pulsas.</div></li>
         <li><i>⚡</i><div><b>Rápido vale más</b>Perfecto 500, bien 350, a tiempo 200. Si es el botón correcto, siempre suma.</div></li>
-        <li><i>🔁</i><div><b>Farmeas tú, luego el rival</b>Diez segundos cada uno, cinco tandas. Mientras él baila, tú le abucheas machacando botones.</div></li>
+        <li><i>🔁</i><div><b>Farmeas tú, luego el rival</b>Diez segundos cada uno, tres tandas. Mientras él baila, tú le abucheas machacando botones.</div></li>
       </ul>
     </div>
     <div class="demoPads" id="demo">
@@ -228,7 +249,7 @@
 <section class="dark" id="rangos">
   <div class="wrap">
     <h2 class="disp">¿Cuánta aura tienes?</h2>
-    <p class="kicker">Cada partida te da un rango. Y toda el aura que ganas se queda en tu perfil para siempre.</p>
+    <p class="kicker">Cada partida te da un rango, y toda el aura que ganas se queda en tu perfil. En la Gira Mundial, además, cada ciudad vale hasta tres estrellas y esconde un premio: pasos nuevos, bailarines y trucos de aura como el abucheo doble o la fiebre blindada.</p>
     <div class="ladder" id="ladder">
       <div class="bar"><div class="fill" id="lfill"></div></div>
       <div class="marks">
@@ -247,14 +268,14 @@
 <section id="batallas">
   <div class="wrap">
     <h2 class="disp">Zona de Batallas</h2>
-    <p class="kicker">Seis rivales con mala leche se enfrentan solos. Tú eliges favorito: acertar suma 500 a tu perfil, y cada acierto seguido dobla el premio hasta 8.000. De paso, ves qué botón pulsa cada uno.</p>
+    <p class="kicker">Cada batalla en una ciudad distinta: Chapultepec, Copacabana, el Obelisco, la Paulista, Gran Vía, la Torre Eiffel… quince spots reales, diez de Latinoamérica y cinco de Europa, cada uno con su farmeador local: El Chilango, Carioca Flow, Cholita Power, Lord Griddy… El local recibe a un visitante y se enfrentan solos. Tú eliges favorito: acertar suma 500 a tu perfil, y cada acierto seguido dobla el premio hasta 8.000. De paso, ves qué botón pulsa cada uno.</p>
     <div class="rivals">
-      <div class="rival" style="--c:#FF63B8"><div class="face">😎</div><div class="bub"><b>MAXI RIZZ</b>Mira y aprende, NPC.</div></div>
-      <div class="rival" style="--c:#8BFF5C"><div class="face">👾</div><div class="bub"><b>EL NPC</b>Ejecutando baile.exe</div></div>
-      <div class="rival" style="--c:#B9A6FF"><div class="face">🗿</div><div class="bub"><b>CAPI SIGMA</b>Sin emociones. Solo aura.</div></div>
-      <div class="rival" style="--c:#FFC93C"><div class="face">💅</div><div class="bub"><b>DOÑA AURA</b>Toma nota, criatura.</div></div>
-      <div class="rival" style="--c:#FF7A1F"><div class="face">🍊</div><div class="bub"><b>TITO GYAT</b>Sujétame el cubata.</div></div>
-      <div class="rival" style="--c:#35C7FF"><div class="face">👑</div><div class="bub"><b>LA JEFA</b>Vas a perder con estilo.</div></div>
+      <div class="rival" style="--c:#006847"><div class="face">🌮</div><div class="bub"><b>EL CHILANGO · CDMX</b>Neta, esto es Chapultepec. Nivel dios.</div></div>
+      <div class="rival" style="--c:#009C3B"><div class="face">🏖️</div><div class="bub"><b>CARIOCA FLOW · RÍO</b>Bora, esse é o flow de Copacabana.</div></div>
+      <div class="rival" style="--c:#74ACDF"><div class="face">🧉</div><div class="bub"><b>EL PORTEÑO · BUENOS AIRES</b>Che, mirá cómo se baila en la 9 de Julio.</div></div>
+      <div class="rival" style="--c:#F9E300"><div class="face">🎀</div><div class="bub"><b>CHOLITA POWER · LA PAZ</b>Mi aura llega hasta el Illimani.</div></div>
+      <div class="rival" style="--c:#37E1FF"><div class="face">🌊</div><div class="bub"><b>MARINA BCN · BARCELONA</b>Nen, a la Barceloneta se farmea con brisa.</div></div>
+      <div class="rival" style="--c:#012169"><div class="face">☕</div><div class="bub"><b>LORD GRIDDY · LONDRES</b>Con permiso: aura de Su Majestad.</div></div>
     </div>
     <div class="phone" id="phone">
       <div class="load" id="demoLoad"><span>▶️</span>Cargar una batalla en vivo<small style="font-weight:500">Se abre aquí mismo, sin salir de la página</small></div>
@@ -269,7 +290,7 @@
     <div class="stats">
       <div><b class="disp outline">×2</b>con seis seguidos</div>
       <div><b class="disp outline">+2.000</b>por remate</div>
-      <div><b class="disp outline">8</b>pasos reales</div>
+      <div><b class="disp outline">15</b>ciudades en la Gira</div>
       <div><b class="disp outline">3</b>dificultades</div>
     </div>
   </div>
@@ -415,12 +436,27 @@
 
 /* ==================== MINI-JUEGO DE PADS ==================== */
 (function(){
+  const ICON = (function(){
+    const K='#231052', W='#fff';
+    const w=(d,extra)=>`<svg viewBox="0 0 48 48" fill="none" stroke="${K}" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">${d}${extra||''}</svg>`;
+    return {
+      aura:  w(`<path d="M6 30c4-7 8-7 12 0s8 7 12 0 8-7 12 0" fill="${W}"/><path d="M6 20c4-7 8-7 12 0s8 7 12 0 8-7 12 0" stroke="#37E1FF"/><circle cx="36" cy="11" r="4" fill="#FFD230"/>`),
+      griddy:w(`<path d="M4 18h40" /><rect x="7" y="18" width="14" height="11" rx="5" fill="${K}"/><rect x="27" y="18" width="14" height="11" rx="5" fill="${K}"/><path d="M21 22h6" /><path d="M14 36l-4 7M34 36l4 7" stroke="#FFD230" stroke-width="4"/>`),
+      sic:   w(`<path d="M14 40V16l-6 6M28 40V16l-6 6" stroke="#FF4E9B" stroke-width="5"/><path d="M34 12h8l-6 30" stroke="${K}" stroke-width="5" fill="none"/><text x="24" y="10" font-size="9" font-family="Arial" font-weight="900" text-anchor="middle" fill="${K}" stroke="none">SIX·SEVEN</text>`),
+      skib:  w(`<path d="M24 6a18 18 0 1 1-12.7 30.7" fill="${W}"/><path d="M24 14a10 10 0 1 1-7 17" stroke="#8BFF5C"/><path d="M24 22a2 2 0 1 1-1.4 3.4" />`),
+      siuuu: w(`<circle cx="24" cy="24" r="17" fill="${W}"/><path d="M24 12l7 5-3 8h-8l-3-8z" fill="${K}"/><path d="M31 17l9 2M17 17l-9 2M28 25l4 8M20 25l-4 8M24 41v-8"/><path d="M8 12l4 6M40 12l-4 6" stroke="#FF7A1F" stroke-width="4"/>`),
+      mewing:w(`<circle cx="24" cy="26" r="15" fill="${W}"/><path d="M13 32c3 3 7 4 11 4" /><path d="M17 22h4M27 22h4" /><path d="M35 8v22" stroke="#B9A6FF" stroke-width="6"/><path d="M35 8v22" />`),
+      floss: w(`<circle cx="24" cy="10" r="5" fill="${W}"/><path d="M24 15v16M24 31l-6 12M24 31l6 12"/><path d="M8 24l16-4 16 12" stroke="#E62E9E" stroke-width="5"/><path d="M8 24l16-4 16 12"/>`),
+      shuf:  w(`<path d="M6 32c0-4 4-6 10-7l6-8h6l2 6c8 2 14 4 14 9v4H6z" fill="${W}"/><path d="M6 36h38" stroke="#0FB79A" stroke-width="5"/><path d="M22 17l5 5M27 22l3-4M16 25l6 3"/>`),
+      fire:  w(`<path d="M24 5c2 8 10 10 10 20a10 10 0 0 1-20 0c0-4 2-7 4-9 0 4 2 6 4 6 0-6-2-10 2-17z" fill="#FFD230"/><path d="M24 22c1 4 5 5 5 9a5 5 0 0 1-10 0c0-3 3-4 5-9z" fill="#FF4E9B" stroke="none"/>`)
+    };
+  })();
   const MOVES=[['🌊','AURA FARM','#FFE97A,#FFA919'],['🕶️','GRIDDY','#9BF0FF,#12A9E8'],['✌️','SIC SEVEN','#FFA5D4,#F0158A'],['🌀','SKIBIDI','#C4FFA3,#41CC2E'],
                ['⚽','SIUUU','#FFC48A,#F06A00'],['🤫','MEWING','#D7CCFF,#7C5CFF'],['🕺','FLOSS','#FFBDE4,#E62E9E'],['👟','SHUFFLE','#B8FFEF,#0FB79A']];
   const grid=document.getElementById('padgrid'), judge=document.getElementById('dJudge'), scoreEl=document.getElementById('dScore'), hand=document.getElementById('dHand');
   let score=0, lit=-1, litAt=0, timer=null, last=-1, played=false, started=false;
   const pads=MOVES.map((m,i)=>{ const p=document.createElement('button'); p.className='pad'; p.type='button'; p.style.background=`linear-gradient(180deg,${m[2]})`; p.setAttribute('aria-label',m[1]);
-    p.innerHTML=`<span>${m[0]}</span>${m[1]}<div class="fill"></div>`; p.addEventListener('pointerdown',ev=>{ ev.preventDefault(); press(i); }); grid.appendChild(p); return p; });
+    const ids=['aura','griddy','sic','skib','siuuu','mewing','floss','shuf']; p.innerHTML=`<span class="ico">${ICON[ids[i]]||m[0]}</span>${m[1]}<div class="fill"></div>`; p.addEventListener('pointerdown',ev=>{ ev.preventDefault(); press(i); }); grid.appendChild(p); return p; });
   function say(t,c){ judge.textContent=t; judge.style.color=c; judge.classList.remove('show'); void judge.offsetWidth; judge.classList.add('show'); }
   function light(){ let i; do i=(Math.random()*8)|0; while(i===last); last=i; lit=i; litAt=performance.now(); grid.classList.add('focus'); pads[i].classList.add('lit');
     if(!played){ const r=pads[i].getBoundingClientRect(), g=grid.getBoundingClientRect(); hand.style.left=(r.left-g.left+r.width/2)+'px'; hand.style.top=(r.top-g.top+r.height*.55)+'px'; hand.classList.add('on'); }
@@ -428,7 +464,7 @@
   function off(){ if(lit>=0) pads[lit].classList.remove('lit'); pads.forEach(p=>p.querySelector('.fill').style.height='0%'); grid.classList.remove('focus'); lit=-1; hand.classList.remove('on'); }
   function press(i){ pads[i].classList.add('hit'); setTimeout(()=>pads[i].classList.remove('hit'),90); if(lit<0) return; played=true;
     if(i!==lit){ off(); say('¡CRINGE!','#FF4E9B'); clearTimeout(timer); timer=setTimeout(light,500); return; }
-    const t=(performance.now()-litAt)/1000; const g=t<=.6?500:t<=1?350:200; score+=g; scoreEl.textContent=score.toLocaleString('es-ES');
+    const t=(performance.now()-litAt)/1000; const g=t<=.6?500:t<=1?350:200; score+=g; if(score===g) track('demo_pads_primer_acierto'); scoreEl.textContent=score.toLocaleString('es-ES');
     say(t<=.6?'¡PERFECTO! +500':t<=1?'¡BIEN! +350':'A TIEMPO +200', t<=.6?'#FFE97A':t<=1?'#8BFF5C':'#FFC7F0'); off(); clearTimeout(timer); timer=setTimeout(light,380); }
   (function tick(){ requestAnimationFrame(tick); if(lit<0) return; const p=Math.min(1,(performance.now()-litAt)/1800); pads[lit].querySelector('.fill').style.height=((1-p)*100)+'%'; })();
   function start(){ if(started) return; started=true; light(); }
@@ -451,10 +487,19 @@
   document.getElementById('shTg').href='https://t.me/share/url?url='+enc(URLWEB)+'&text='+enc(TXT);
   document.getElementById('shCp').addEventListener('click',e=>{ e.preventDefault(); if(navigator.clipboard) navigator.clipboard.writeText(URLWEB).then(()=>{ e.target.textContent='¡Copiado!'; setTimeout(()=>e.target.textContent='Copiar enlace',1500); }); });
   document.getElementById('demoLoad').addEventListener('click',()=>{ const f=document.createElement('iframe'); f.src='juego.html?batallas=1'; f.allow='autoplay; fullscreen'; f.title='Demo de Aura Battle';
-    const d=document.getElementById('phone'); d.innerHTML=''; d.appendChild(f); });
+    const d=document.getElementById('phone'); d.innerHTML=''; d.appendChild(f); track('demo_batalla_cargada'); });
+  document.querySelectorAll('a[href^="juego.html"]').forEach(a=>a.addEventListener('click',()=>track('clic_jugar',{destino:a.getAttribute('href'),texto:a.textContent.trim().slice(0,30)})));
+  document.querySelectorAll('.share a').forEach(a=>a.addEventListener('click',()=>track('compartir_web',{canal:a.className})));
   const main=document.getElementById('playBtn'), sticky=document.querySelector('.sticky');
   if('IntersectionObserver' in window) new IntersectionObserver(([en])=>{ sticky.style.display=en.isIntersecting?'none':''; }).observe(main);
 })();
 </script>
+<div id="cookies" hidden>
+  <p>Usamos Google Analytics para contar visitas y ver qué se juega. Nada de anuncios ni de datos personales. <a href="privacidad.html">Más info</a></p>
+  <button id="ckOk" type="button">Aceptar</button><button id="ckNo" type="button">Solo lo necesario</button>
+</div>
+<script>(function(){var b=document.getElementById('cookies');try{if(localStorage.getItem('ab_cookies'))return;}catch(e){}b.hidden=false;
+function set(v){try{localStorage.setItem('ab_cookies',v);}catch(e){}if(v==='ok'&&window.gtag)gtag('consent','update',{analytics_storage:'granted'});b.hidden=true;}
+document.getElementById('ckOk').addEventListener('click',function(){set('ok');});document.getElementById('ckNo').addEventListener('click',function(){set('no');});})();</script>
 </body>
 </html>
