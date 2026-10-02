@@ -329,6 +329,7 @@ function track(n,p){ try{ gtag('event',n,p||{}); }catch(e){} }
     max-width:min(92vw,560px);overflow:hidden;text-overflow:ellipsis;font-size:clamp(9px,1.9vh,13px);color:#FFE97A;letter-spacing:.5px;
     background:rgba(24,9,66,.6);border:2px solid rgba(255,255,255,.18);border-radius:99px;padding:2px 12px;pointer-events:none;}
   #hud.playing #spotTag{display:block;}
+  body.songOn #spotTag::after{content:' 🎵';}
   .spotRow{display:flex;align-items:center;gap:10px;}
   .spotBtn{width:38px;height:38px;border-radius:99px;border:3px solid var(--ink);background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;
     font-size:18px;box-shadow:0 4px 0 rgba(35,16,82,.6);cursor:pointer;pointer-events:auto;}
@@ -632,7 +633,7 @@ const pick  = a=>a[(Math.random()*a.length)|0];
 const MOVES = [
   {id:'aura',  name:'AURA FARM', ic:'🌊', col:'#FFD230', pad:'linear-gradient(180deg,#FFE97A,#FFA919)'},
   {id:'griddy',name:'GRIDDY',    ic:'🕶️', col:'#37E1FF', pad:'linear-gradient(180deg,#9BF0FF,#12A9E8)'},
-  {id:'sic',   name:'SIC SEVEN', ic:'✌️', col:'#FF4E9B', pad:'linear-gradient(180deg,#FFA5D4,#F0158A)'},
+  {id:'sic',   name:'SIX SEVEN', ic:'✌️', col:'#FF4E9B', pad:'linear-gradient(180deg,#FFA5D4,#F0158A)'},
   {id:'skib',  name:'SKIBIDI',   ic:'🌀', col:'#8BFF5C', pad:'linear-gradient(180deg,#C4FFA3,#41CC2E)'},
   {id:'siuuu', name:'SIUUU',     ic:'⚽', col:'#FF7A1F', pad:'linear-gradient(180deg,#FFC48A,#F06A00)'},
   {id:'mewing',name:'MEWING',    ic:'🤫', col:'#B9A6FF', pad:'linear-gradient(180deg,#D7CCFF,#7C5CFF)'},
@@ -647,7 +648,7 @@ const ICON = (function(){
   return {
     aura:  w(`<path d="M6 30c4-7 8-7 12 0s8 7 12 0 8-7 12 0" fill="${W}"/><path d="M6 20c4-7 8-7 12 0s8 7 12 0 8-7 12 0" stroke="#37E1FF"/><circle cx="36" cy="11" r="4" fill="#FFD230"/>`),
     griddy:w(`<path d="M4 18h40" /><rect x="7" y="18" width="14" height="11" rx="5" fill="${K}"/><rect x="27" y="18" width="14" height="11" rx="5" fill="${K}"/><path d="M21 22h6" /><path d="M14 36l-4 7M34 36l4 7" stroke="#FFD230" stroke-width="4"/>`),
-    sic:   w(`<path d="M14 40V16l-6 6M28 40V16l-6 6" stroke="#FF4E9B" stroke-width="5"/><path d="M34 12h8l-6 30" stroke="${K}" stroke-width="5" fill="none"/><text x="24" y="10" font-size="9" font-family="Arial" font-weight="900" text-anchor="middle" fill="${K}" stroke="none">SIX·SEVEN</text>`),
+    sic:   w(`<path d="M5 14l3-5 3 5M5 34l3 5 3-5" stroke="#FFD230" stroke-width="3"/><path d="M37 14l3-5 3 5M37 34l3 5 3-5" stroke="#FFD230" stroke-width="3"/><text x="24" y="35" text-anchor="middle" font-family="'Luckiest Guy','Arial Black',Impact,sans-serif" font-size="27" font-weight="900" fill="${W}" stroke="${K}" stroke-width="3.2" paint-order="stroke" letter-spacing="-1">67</text>`),
     skib:  w(`<path d="M24 6a18 18 0 1 1-12.7 30.7" fill="${W}"/><path d="M24 14a10 10 0 1 1-7 17" stroke="#8BFF5C"/><path d="M24 22a2 2 0 1 1-1.4 3.4" />`),
     siuuu: w(`<circle cx="24" cy="24" r="17" fill="${W}"/><path d="M24 12l7 5-3 8h-8l-3-8z" fill="${K}"/><path d="M31 17l9 2M17 17l-9 2M28 25l4 8M20 25l-4 8M24 41v-8"/><path d="M8 12l4 6M40 12l-4 6" stroke="#FF7A1F" stroke-width="4"/>`),
     mewing:w(`<circle cx="24" cy="26" r="15" fill="${W}"/><path d="M13 32c3 3 7 4 11 4" /><path d="M17 22h4M27 22h4" /><path d="M35 8v22" stroke="#B9A6FF" stroke-width="6"/><path d="M35 8v22" />`),
@@ -1656,7 +1657,7 @@ function tone(freq, dur, type, vol, slide){
   g.gain.setValueAtTime(0.0001, AC.currentTime);
   g.gain.exponentialRampToValueAtTime(vol||0.15, AC.currentTime+0.012);
   g.gain.exponentialRampToValueAtTime(0.0001, AC.currentTime+dur);
-  o.connect(g); g.connect(AC.destination); o.start(); o.stop(AC.currentTime+dur+0.02);
+  o.connect(g); g.connect(ROUTE_MUSIC ? musicOut() : sfxOut()); o.start(); o.stop(AC.currentTime+dur+0.02);
 }
 function noise(dur, vol){
   if(!AC||muted) return;
@@ -1664,30 +1665,100 @@ function noise(dur, vol){
   for(let i=0;i<n;i++) d[i]=(Math.random()*2-1)*(1-i/n);
   const s=AC.createBufferSource(); s.buffer=buf;
   const g=AC.createGain(); g.gain.value=vol||0.06;
-  s.connect(g); g.connect(AC.destination); s.start();
+  s.connect(g); g.connect(ROUTE_MUSIC ? musicOut() : sfxOut()); s.start();
 }
+/* ---------- MEZCLA: música y efectos en buses separados, con un compresor común ---------- */
+let ROUTE_MUSIC = false;
+const MIX = {ready:false, tried:false, music:null, sfx:null, comp:null};
+function mix(){
+  if(MIX.ready) return true; if(!AC || MIX.tried) return false; MIX.tried = true;
+  try{
+    const c = AC.createDynamicsCompressor();
+    c.threshold.value = -16; c.knee.value = 12; c.ratio.value = 3; c.attack.value = 0.004; c.release.value = 0.22; c.connect(AC.destination);
+    const m = AC.createGain(); m.gain.value = 1; m.connect(c);
+    const f = AC.createGain(); f.gain.value = 0.8; f.connect(c);
+    MIX.comp = c; MIX.music = m; MIX.sfx = f; MIX.ready = true;
+  }catch(e){ MIX.ready = false; }
+  return MIX.ready;
+}
+function sfxOut(){ return mix() ? MIX.sfx : AC.destination; }
+function musicOut(){ return mix() ? MIX.music : AC.destination; }
+/* la música se aparta un instante para que se oiga el efecto, y vuelve sola */
+function duck(depth, secs){
+  if(!mix() || !TRACK.src) return;
+  const g = MIX.music.gain, t = AC.currentTime;
+  try{ g.cancelScheduledValues(t); g.setValueAtTime(g.value, t); g.linearRampToValueAtTime(depth, t+0.025); g.setTargetAtTime(1, t+0.06, (secs||0.3)/3); }catch(e){}
+}
+
+/* ---------- TONO: los efectos suenan en la tonalidad de la canción ---------- */
+const KEY = {root:69, minor:true};                      // La menor: la tonalidad del sintetizador
+const ESC_MIN = [0,2,3,5,7,8,10], ESC_MAY = [0,2,4,5,7,9,11];
+function nota(grado, oct){
+  const e = KEY.minor ? ESC_MIN : ESC_MAY, g = ((grado%7)+7)%7, o = Math.floor(grado/7) + (oct||0);
+  return 440*Math.pow(2, (KEY.root + e[g] + 12*o - 69)/12);
+}
+function setKey(meta){ if(meta){ KEY.root = 60 + meta.root; if(KEY.root < 64) KEY.root += 12; KEY.minor = !!meta.minor; } else { KEY.root = 69; KEY.minor = true; } }
+
+/* ---------- PULSO: los botones se encienden y el rival baila a tempo ---------- */
+const CLOCK = {mode:null, t0:0, beat:0.5, phase:0, len:0, last:0, bi:-1, nextHat:0};
+function beatPos(now){ return ((now - CLOCK.t0) % CLOCK.len + CLOCK.len) % CLOCK.len; }
+function beatWait(min){                                   // segundos hasta el primer pulso pasado "min"
+  if(!AC || !CLOCK.mode) return min;
+  const now = AC.currentTime + min, b = CLOCK.beat; let next;
+  if(CLOCK.mode==='track'){ const pos = beatPos(now); const k = Math.ceil((pos - CLOCK.phase)/b - 1e-6); next = now + (CLOCK.phase + k*b - pos); }
+  else { const k = Math.ceil((now - CLOCK.last)/b - 1e-6); next = CLOCK.last + k*b; }
+  return Math.max(0, min + (next - now));
+}
+function beatIndex(){
+  if(!AC || !CLOCK.mode) return -1;
+  if(CLOCK.mode==='track') return Math.floor((beatPos(AC.currentTime) - CLOCK.phase)/CLOCK.beat);
+  return Math.floor((AC.currentTime - CLOCK.last)/CLOCK.beat) + Math.round(CLOCK.last*1000);
+}
+/* charles a corcheas en modo fiebre, encima de la canción y a su tempo */
+function hatAt(when, acc){
+  if(!AC || muted) return;
+  const n = (AC.sampleRate*0.045)|0, buf = AC.createBuffer(1,n,AC.sampleRate), d = buf.getChannelData(0);
+  for(let i=0;i<n;i++) d[i] = (Math.random()*2-1)*Math.pow(1-i/n, 3);
+  const src = AC.createBufferSource(); src.buffer = buf;
+  const g = AC.createGain(); g.gain.value = acc ? 0.07 : 0.04;
+  let out = g; try{ const hp = AC.createBiquadFilter(); hp.type='highpass'; hp.frequency.value = 7000; src.connect(hp); hp.connect(g); }catch(e){ src.connect(g); }
+  g.connect(sfxOut()); try{ src.start(when); }catch(e){}
+}
+function audioTick(){
+  if(!AC || !CLOCK.mode) return;
+  const bi = beatIndex(); if(bi !== CLOCK.bi){ CLOCK.bi = bi; beatPulse = 1; } else beatPulse *= 0.88;
+  if(S.fever && CLOCK.mode==='track' && musicOn && !muted){
+    const t = AC.currentTime, half = CLOCK.beat/2;
+    if(!CLOCK.nextHat || CLOCK.nextHat < t) CLOCK.nextHat = t + beatWait(0);
+    while(CLOCK.nextHat < t + 0.12){ const on = Math.round(beatPos(CLOCK.nextHat - 0.001 + half*0)/half) % 2 === 0; hatAt(CLOCK.nextHat, on); CLOCK.nextHat += half; }
+  } else CLOCK.nextHat = 0;
+}
+
 const SFX = {
-  perfect(){ tone(880,.09,'square',.13); setTimeout(()=>tone(1320,.12,'square',.12),70); setTimeout(()=>tone(1760,.16,'triangle',.1),150); },
-  good(){ tone(660,.1,'square',.11); setTimeout(()=>tone(880,.11,'square',.09),80); },
-  bad(){ tone(220,.28,'sawtooth',.1,80); noise(.2,.05); },
-  miss(){ tone(120,.3,'sine',.14,60); },
-  tick(){ tone(1400,.03,'triangle',.05); },
-  fire(){ tone(160,.5,'sawtooth',.14,900); setTimeout(()=>tone(1200,.4,'square',.1,300),120); noise(.5,.08); },
-  win(){ [523,659,784,1046].forEach((f,i)=>setTimeout(()=>tone(f,.22,'square',.13),i*110)); },
-  lose(){ [440,392,330,247].forEach((f,i)=>setTimeout(()=>tone(f,.26,'sawtooth',.1),i*140)); },
-  crowd(){ noise(.6,.07); },
+  perfect(){ duck(0.78, 0.25); tone(nota(0,1),.10,'triangle',.13); setTimeout(()=>tone(nota(2,1),.11,'triangle',.12),60); setTimeout(()=>{ tone(nota(4,1),.18,'triangle',.11); tone(nota(0,2),.16,'sine',.05); },120); },
+  good(){ duck(0.85, 0.2); tone(nota(4,0),.10,'triangle',.11); setTimeout(()=>tone(nota(0,1),.12,'triangle',.09),70); },
+  bad(){ tone(nota(1,-1),.26,'sawtooth',.07,nota(0,-2)); noise(.16,.035); },
+  miss(){ tone(nota(0,-1),.30,'sine',.12,nota(0,-2)); },
+  tick(){ tone(nota(4,1),.035,'sine',.05); },
+  fire(){ duck(0.55, 0.7); tone(nota(0,-1),.5,'sawtooth',.10,nota(0,1)); setTimeout(()=>[0,2,4].forEach(g=>tone(nota(g,1),.4,'triangle',.07)),180); noise(.45,.06); },
+  win(){ duck(0.6, 0.8); [0,2,4,7].forEach((g,i)=>setTimeout(()=>tone(nota(g,0),.24,'triangle',.13),i*110)); },
+  lose(){ [4,3,1,0].forEach((g,i)=>setTimeout(()=>tone(nota(g,-1),.28,'triangle',.10),i*140)); },
+  crowd(){ noise(.6,.06); },
+  boo(n){ tone(nota(n,-1),.06,'square',.045); },
   glory(big){
-    tone(180,.9,'sawtooth',.07,1760); noise(.8,.07);
-    const n = big ? [523,659,784,1046,1318] : [659,784,1046];
-    n.forEach((f,i)=>setTimeout(()=>{ tone(f,.5,'triangle',.1); tone(f*1.5,.4,'sine',.035); }, 120+i*110));
-    if(big) setTimeout(()=>[523,659,784,1046].forEach(f=>tone(f,1.5,'triangle',.06)), 820);
+    duck(big?0.45:0.65, big?1.2:0.6);
+    tone(nota(0,-1),.9,'sawtooth',.06,nota(0,2)); noise(.7,.06);
+    const g = big ? [0,2,4,7,9] : [2,4,7];
+    g.forEach((d,i)=>setTimeout(()=>{ tone(nota(d,0),.5,'triangle',.1); tone(nota(d+4,0),.4,'sine',.03); }, 120+i*110));
+    if(big) setTimeout(()=>[0,2,4,7].forEach(d=>tone(nota(d,0),1.5,'triangle',.055)), 820);
   }
 };
+
 /* Secuenciador de 16 pasos: bombo, caja, charles, bajo y acordes. Am · F · C · G */
 let bpm = 126, beatPulse = 0, seqStep = 0;
 const CHORDS = [[110,130.8,164.8],[87.3,110,130.8],[130.8,164.8,196],[98,123.5,146.8]];  // Am F C G
 const BASSP  = [0,0,12,0, 7,0,12,7];                 // semitonos sobre la fundamental
-function musicTempo(v){ bpm = v; if(TRACK.src && AC) TRACK.src.playbackRate.setTargetAtTime(v>130 ? 1.06 : 1, AC.currentTime, 0.4); }
+function musicTempo(v){ bpm = v; }      // la canción no se acelera (cambiaría de tono); la fiebre añade charles a su tempo
 
 /* ---------- MÚSICA POR SPOT (archivos MP3 opcionales) ----------
    Coloca en la carpeta musica/ un archivo por ciudad con el id del spot:
@@ -1695,19 +1766,48 @@ function musicTempo(v){ bpm = v; if(TRACK.src && AC) TRACK.src.playbackRate.setT
    Si un archivo no existe o no carga, suena la música sintetizada. */
 /* Bucles preparados para el juego: duración exacta en segundos (sin el relleno del MP3).
    Si una canción no está aquí, se repite el archivo entero. */
-const MUSIC_LOOP = { bcn: 94.45399, cdmx: 80.42975 };
+const MUSIC_META = {
+  bcn: {loop:94.45401, bpm:132.13, phase:0.329, root:9, minor:true},
+  cdmx: {loop:80.42975, bpm:143.98, phase:0.354, root:9, minor:true},
+  paris: {loop:89.79302, bpm:128.3, phase:0.257, root:7, minor:true},
+  lapaz: {loop:96.07887, bpm:132.39, phase:0.125, root:7, minor:true},
+  rio: {loop:50.01787, bpm:134.35, phase:0.435, root:7, minor:true},
+  sp: {loop:47.02073, bpm:132.71, phase:0.0, root:2, minor:true},
+  santiago: {loop:83.38694, bpm:109.37, phase:0.123, root:7, minor:true},
+  lima: {loop:86.31229, bpm:115.39, phase:0.481, root:7, minor:false},
+  bogota: {loop:87.31569, bpm:105.14, phase:0.086, root:7, minor:true},
+  bsas: {loop:90.60594, bpm:98.01, phase:0.566, root:0, minor:false},
+  gdl: {loop:96.96712, bpm:99.0, phase:0.561, root:9, minor:true}
+};
+const MUSIC_LOOP = Object.fromEntries(Object.entries(MUSIC_META).map(([k,v])=>[k,v.loop]));
 const TRACK = {id:null, raw:null, buf:null, ok:false, src:null, gain:null, vol:0.55, loopStart:0, loopEnd:0};
 let musicOn = false;
 function loadTrack(spot){
   if(!spot || TRACK.id===spot.id) return;
   musicStop();                                                  // la canción anterior se funde, no se corta en seco
+  if(TRACK.el){ try{ TRACK.el.pause(); }catch(e){} TRACK.el = null; }
+  TRACK.isEl = false;
   TRACK.id = spot.id; TRACK.ok = false; TRACK.buf = null; TRACK.raw = null;
   if(musicOn) startBeat();                                      // mientras llega la canción nueva, sintetizador
-  if(typeof fetch!=='function') return;
   const id = spot.id;
+  // canción incrustada (versión de prueba): se lee directamente, sin fetch
+  if(typeof EMBED_MUSIC!=='undefined' && EMBED_MUSIC[id]){
+    try{ TRACK.raw = b64ToBuf(EMBED_MUSIC[id]); decodeTrack(); }catch(e){ useElement(id); }
+    return;
+  }
+  if(typeof fetch!=='function') return;
   fetch('musica/'+id+'.mp3').then(r=>{ if(!r.ok) throw new Error('sin canción'); return r.arrayBuffer(); })
     .then(ab=>{ if(TRACK.id!==id) return; TRACK.raw = ab; decodeTrack(); })
-    .catch(()=>{});
+    .catch(e=>{ if(e && e.message!=='sin canción') useElement(id); });   // si falla la descarga por otra razón, se intenta con el reproductor normal
+}
+function b64ToBuf(b64){ const bin = atob(b64), n = bin.length, u = new Uint8Array(n); for(let i=0;i<n;i++) u[i] = bin.charCodeAt(i); return u.buffer; }
+/* plan B: si el navegador no puede decodificar el MP3 con Web Audio, suena con el reproductor de siempre */
+function useElement(id){
+  if(TRACK.id!==id || TRACK.ok || typeof Audio==='undefined') return;
+  const url = (typeof EMBED_MUSIC!=='undefined' && EMBED_MUSIC[id]) ? 'data:audio/mpeg;base64,'+EMBED_MUSIC[id] : 'musica/'+id+'.mp3';
+  const el = new Audio(url); el.loop = true; el.preload = 'auto'; el.volume = TRACK.vol; el.setAttribute('playsinline','');
+  TRACK.el = el; TRACK.isEl = true; TRACK.ok = true;
+  if(musicOn) musicPlay();
 }
 function decodeTrack(){
   if(!AC || !TRACK.raw || TRACK.buf) return;
@@ -1724,32 +1824,50 @@ function decodeTrack(){
     TRACK.buf = b; TRACK.ok = true;
     if(musicOn) musicPlay();
   };
-  try{ const pr = AC.decodeAudioData(raw, done, ()=>{}); if(pr && pr.then) pr.then(done).catch(()=>{}); }catch(e){}
+  const fail = ()=>{ if(!fired){ fired = true; useElement(id); } };
+  try{ const pr = AC.decodeAudioData(raw, done, fail); if(pr && pr.then) pr.then(done).catch(fail); }catch(e){ fail(); }
 }
 function musicPlay(){
+  if(TRACK.isEl){
+    if(!TRACK.ok || muted || TRACK.src) return;
+    const el = TRACK.el; const pr = el.play(); if(pr && pr.catch) pr.catch(()=>{});
+    TRACK.src = {elemento:true}; if(beatTimer){ clearTimeout(beatTimer); beatTimer = null; }
+    CLOCK.mode = null; setKey(MUSIC_META[TRACK.id]); document.body.classList.add('songOn'); return;
+  }
   if(!AC) return; decodeTrack();
   if(!TRACK.ok || muted || TRACK.src) return;
-  const g = AC.createGain(); g.gain.value = 0; g.connect(AC.destination);
+  const g = AC.createGain(); g.gain.value = 0; g.connect(musicOut());
   const src = AC.createBufferSource(); src.buffer = TRACK.buf; src.loop = true;
   src.loopStart = TRACK.loopStart; src.loopEnd = TRACK.loopEnd;
-  src.playbackRate.value = bpm>130 ? 1.06 : 1;
   src.connect(g); src.start(0, TRACK.loopStart);
+  const mt = MUSIC_META[TRACK.id];
+  if(mt){ CLOCK.mode='track'; CLOCK.t0=AC.currentTime; CLOCK.beat=60/mt.bpm; CLOCK.phase=mt.phase; CLOCK.len=TRACK.loopEnd-TRACK.loopStart; setKey(mt); }
+  if(mt && S.mode==='play'){ if(!S.prompt && S.gap>0) S.gap = beatWait(S.gap); if(S.aiGap>0) S.aiGap = beatWait(S.aiGap); }   // lo que estaba pendiente, al pulso
+  else { CLOCK.mode=null; setKey(null); }
   g.gain.setTargetAtTime(TRACK.vol, AC.currentTime, 0.35);
-  TRACK.src = src; TRACK.gain = g;
+  TRACK.src = src; TRACK.gain = g; document.body.classList.add('songOn');
   if(beatTimer){ clearTimeout(beatTimer); beatTimer = null; }      // calla el sintetizador
 }
 function musicStop(){
+  document.body.classList.remove('songOn');
+  if(TRACK.isEl){ if(TRACK.el) TRACK.el.pause(); TRACK.src = null; return; }
   if(!TRACK.src || !AC) return;
   const src = TRACK.src, g = TRACK.gain; TRACK.src = null; TRACK.gain = null;
   try{ g.gain.setTargetAtTime(0, AC.currentTime, 0.18); src.stop(AC.currentTime + 1.0); }catch(e){}
 }
 function musicStopNow(){
+  document.body.classList.remove('songOn');
+  if(TRACK.isEl){ if(TRACK.el) TRACK.el.pause(); TRACK.src = null; return; }
   if(!TRACK.src) return;
   try{ TRACK.src.stop(); }catch(e){}
   TRACK.src = null; TRACK.gain = null;
 }
 function stepMusic(){
   if(muted||!AC||!musicOn) return;
+  if(seqStep%4===0){ CLOCK.mode='synth'; CLOCK.last=AC.currentTime; CLOCK.beat=60/bpm; }
+  ROUTE_MUSIC = true; try{ stepMusicInner(); } finally { ROUTE_MUSIC = false; }
+}
+function stepMusicInner(){
   const bar = Math.floor(seqStep/16)%4, st = seqStep%16, chord = CHORDS[bar];
   // charles
   noise(.03, st%4===2 ? .05 : .022);
@@ -1769,10 +1887,11 @@ function startBeat(){
   stopBeat(); musicOn = true; seqStep = 0;
   decodeTrack();
   if(TRACK.ok){ musicPlay(); return; }                          // hay canción del spot
+  setKey(null);
   const loop = ()=>{ if(!musicOn || TRACK.src) return; stepMusic(); beatPulse = (seqStep%4===1) ? 1 : beatPulse*0.6; beatTimer = setTimeout(loop, 60000/bpm/4); };
   loop();
 }
-function stopBeat(){ musicOn = false; if(beatTimer) clearTimeout(beatTimer); beatTimer=null; musicStop(); }
+function stopBeat(){ musicOn = false; CLOCK.mode = null; if(beatTimer) clearTimeout(beatTimer); beatTimer=null; musicStop(); }
 
 /* ============================================================
    ESTADO DE JUEGO — 5 tandas, farmea uno y luego el otro
@@ -1938,8 +2057,8 @@ function startTurn(i){
   S.turn = i;
   S.turnTime = S.turnLen;
   S.prompt = null;
-  S.gap = i===0 ? 1.0 : 0;
-  S.aiGap = 0.6;
+  S.gap = i===0 ? beatWait(0.9) : 0;
+  S.aiGap = beatWait(0.5);
   { const d = DIFF[S.diff]; S.aiAcc = S.spectate ? 0.74 : Math.min(d.max, d.acc0 + d.step*(S.tanda-1)); }   // en la zona bailan a tope
   S.boos = 0; S.boosUsed = 0; if(i===1) paintBoo();
   S.finishing = false;
@@ -2580,7 +2699,7 @@ function clearPrompt(){
   Object.keys(PFILL).forEach(k=>PFILL[k].style.height='0%');
   $('#pads').classList.remove('focus');
   document.querySelectorAll('.pad.holding').forEach(e=>e.classList.remove('holding'));
-  S.prompt=null; S.gap = 0.28;
+  S.prompt=null; S.gap = beatWait(0.15);
   if($('#tut').classList.contains('on')){ hideTut(); S.tut++; }
 }
 
@@ -2639,7 +2758,7 @@ function padDown(id, el){
     if(S.boosUsed >= BOO_MAX){ playAnim(P1, id, 0.5); return; }
     playAnim(P1, id, 0.5);
     S.boos++;
-    tone(140 + S.boos*12, .05, 'square', .05); buzz(8);
+    SFX.boo(S.boos); buzz(8);
     floater('¡buuu!', 26 + Math.random()*12, 46 + Math.random()*8, '#37E1FF');
     paintBoo();
     if(S.boos >= BOO_NEED){
@@ -2754,7 +2873,7 @@ function resolve(kind){
   }
   clearPrompt();
   // cadencia fija: reaccionar rápido da más puntos, no más botones
-  S.gap = Math.max(0.25, 0.95 - pr.t);
+  S.gap = beatWait(Math.max(0.15, 0.75 - pr.t));
 }
 
 /* --------- el rival farmea en su turno --------- */
@@ -2835,7 +2954,7 @@ function tick(now){
     if(S.turnTime<=0){ endTurn(); }
     else if(S.turn===1 || S.spectate){
       S.aiGap -= dt;
-      if(S.aiGap<=0){ aiPerform(S.turn); S.aiGap = (S.spectate ? 1.0 : DIFF[S.diff].gap) + rnd(-0.1,0.25); }
+      if(S.aiGap<=0){ aiPerform(S.turn); S.aiGap = beatWait(Math.max(0.3, (S.spectate ? 1.0 : DIFF[S.diff].gap) - 0.2 + rnd(-0.1,0.25))); }
     }
     else if(S.prompt){
       const pr=S.prompt; pr.t+=dt;
@@ -2861,6 +2980,7 @@ function tick(now){
   if(P2) updateChar(P2, dt, clockT);
   updateBursts(dt);
   updateGlory(raw);
+  audioTick();
   placeBubbles();
 
   // público y decorado
