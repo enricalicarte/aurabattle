@@ -1,0 +1,22 @@
+MÚSICA POR CIUDAD (opcional)
+============================
+Pon aquí un MP3 por spot, con el nombre exacto del id de la ciudad:
+
+  bcn.mp3       Barcelona          madrid.mp3    Madrid
+  paris.mp3     París              londres.mp3   Londres
+  berlin.mp3    Berlín             bsas.mp3      Buenos Aires
+  santiago.mp3  Santiago           lapaz.mp3     La Paz
+  lima.mp3      Lima               bogota.mp3    Bogotá
+  medellin.mp3  Medellín           sp.mp3        São Paulo
+  rio.mp3       Río de Janeiro     gdl.mp3       Guadalajara
+  cdmx.mp3      Ciudad de México
+
+Cómo funciona
+- La canción suena en bucle mientras se juega en esa ciudad (partida, Gira o Zona de Batallas).
+- Si falta el archivo de una ciudad, suena la música sintetizada del juego.
+- El botón de sonido del juego también la silencia. En modo Fiebre se acelera un 6 %.
+
+Recomendaciones
+- Que sea un bucle limpio de 60 a 90 segundos, a 128 kbps (1 a 1,5 MB por archivo). Solo se descarga la canción de la ciudad que se está jugando.
+- Sin voz o con muy poca: compite con los sonidos del juego.
+- Derechos: usa música libre de derechos o con licencia (por ejemplo, Pixabay Music, Uppbeat o Epidemic Sound). La música comercial sin licencia puede hacer que la web sea bloqueada o retirada.
